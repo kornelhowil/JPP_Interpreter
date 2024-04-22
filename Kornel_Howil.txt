@@ -1,0 +1,129 @@
+---- OPIS JĘZYKA ----
+Język jest zmodyfikowaną wersją języka Latte. Został pomniejszony o rzeczy niebędące w tabeli cech
+(jak np. inkrementacja i dekrementacja czy typ void). Dodatkowo pozwala na:
+
+1. Przekazywanie zmiennych przez wartość lub przez zmienną przy uzyciu słowa kluczowego 'var'
+
+    int funkcja(var int zmienna1, int zmienna2) {
+        zmienna1 = zmienna1 + 1;
+        zmienna2 = zmienna2 + 1;
+        return 0;
+    }
+    int i = 1;
+    int j = 1;
+    funkcja(i, j);
+    print(i); # wypisuje 2
+    print(j); # wypisuje 1
+
+2. Tworzenie wielowymiarowych tablic
+
+    int[2][2] t = [[1, 2], [3,4]]; # inicjuje tablicę o wymiarach 2x2
+    print(t[0,0]); # wypisuje 1
+
+3. Zagnieżdżone funkcje
+
+    int main() {
+        int x = 1;
+        int f1() {
+            int x = 2;
+            print(x);
+        }
+        f1(); # wypisuje 2
+        print(x); # wypisuje 1
+    }
+
+
+---- TABELKA CECH ----
+
+Na 15 punktów
+01 + (trzy typy)
+02 + (literały, arytmetyka, porównania)
+03 + (zmienne, przypisanie)
+04 + (print)
+05 + (while, if)
+06 + (funkcje lub procedury, rekurencja)
+07 + (przez zmienną / przez wartość / in/out)
+08 - (zmienne read-only i pętla for)
+
+Na 20 punktów
+09 + (przesłanianie i statyczne wiązanie)
+10 + (obsługa błędów wykonania)
+11 + (funkcje zwracające wartość)
+
+Na 30 punktów
+12 + (4) (statyczne typowanie)
+13 + (2) (funkcje zagnieżdżone ze statycznym wiązaniem)
+14 + (1/2) (rekordy/listy/tablice/tablice wielowymiarowe)
+15 - (2) (krotki z przypisaniem)
+16 - (1) (break, continue)
+17 - (4) (funkcje wyższego rzędu, anonimowe, domknięcia)
+18 - (3) (generatory)
+
+Razem: 28/30
+
+
+---- GRAMATYKA ----
+
+-- programs ------------------------------------------------
+entrypoints Program ;
+Program.   Program ::= [Func] ;
+-- functions ------------------------------------------------
+FnDef.	   Func ::= Type Ident "(" [Arg] ")" Block ;
+separator nonempty Func "" ;
+Arg. 	   Arg ::= Type Ident;
+ArgVar.    Arg ::= "var" Type Ident;
+separator  Arg "," ;
+-- statements ----------------------------------------------
+Block.     Block ::= "{" [Stmt] "}" ;
+separator  Stmt "" ;
+Empty.     Stmt ::= ";" ;
+BStmt.     Stmt ::= Block ;
+Decl.      Stmt ::= Type [Item] ";" ;
+NoInit.    Item ::= Ident ; 
+Init.      Item ::= Ident "=" Expr ;
+separator nonempty Item "," ;
+Ass.       Stmt ::= Ident "=" Expr  ";" ;
+Ret.       Stmt ::= "return" Expr ";" ;
+Cond.      Stmt ::= "if" "(" Expr ")" Stmt  ;
+CondElse.  Stmt ::= "if" "(" Expr ")" Stmt "else" Stmt  ;
+While.     Stmt ::= "while" "(" Expr ")" Stmt ;
+SExp.      Stmt ::= Expr  ";" ;
+Print.     Stmt ::= "print" "(" Expr ")" ";" ;
+Func.      Stmt ::= Func ;
+-- Types ---------------------------------------------------
+Int.       Type ::= "int" ;
+Str.       Type ::= "string" ;
+Bool.      Type ::= "bool" ;
+Array.     Type ::= Type "[" Expr "]" ;
+-- Expressions ---------------------------------------------
+EArr.      Expr6 ::= "[" [Expr] "]" ;
+EArrVal.   Expr6 ::= Ident "[" [Expr] "]" ;
+EVar.      Expr6 ::= Ident ;
+ELitInt.   Expr6 ::= Integer ;
+ELitTrue.  Expr6 ::= "true" ;
+ELitFalse. Expr6 ::= "false" ;
+EApp.      Expr6 ::= Ident "(" [Expr] ")" ;
+EString.   Expr6 ::= String ;
+Neg.       Expr5 ::= "-" Expr6 ;
+Not.       Expr5 ::= "!" Expr6 ;
+EMul.      Expr4 ::= Expr4 MulOp Expr5 ;
+EAdd.      Expr3 ::= Expr3 AddOp Expr4 ;
+ERel.      Expr2 ::= Expr2 RelOp Expr3 ;
+EAnd.      Expr1 ::= Expr2 "&&" Expr1 ;
+EOr.       Expr ::= Expr1 "||" Expr ;
+coercions  Expr 6 ;
+separator  Expr "," ;
+-- operators -----------------------------------------------
+Plus.      AddOp ::= "+" ;
+Minus.     AddOp ::= "-" ;
+Times.     MulOp ::= "*" ;
+Div.       MulOp ::= "/" ;
+Mod.       MulOp ::= "%" ;
+LTH.       RelOp ::= "<" ;
+LE.        RelOp ::= "<=" ;
+GTH.       RelOp ::= ">" ;
+GE.        RelOp ::= ">=" ;
+EQU.       RelOp ::= "==" ;
+NE.        RelOp ::= "!=" ;
+-- comments ------------------------------------------------
+comment    "#" ;
