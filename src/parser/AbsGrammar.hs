@@ -40,10 +40,9 @@ data Stmt' a
     | Decl a (Type' a) [Item' a]
     | Ass a Ident (Expr' a)
     | Ret a (Expr' a)
-    | Cond a (Expr' a) (Stmt' a)
-    | CondElse a (Expr' a) (Stmt' a) (Stmt' a)
-    | While a (Expr' a) (Stmt' a)
-    | SExp a (Expr' a)
+    | Cond a (Expr' a) (Block' a)
+    | CondElse a (Expr' a) (Block' a) (Block' a)
+    | While a (Expr' a) (Block' a)
     | Print a (Expr' a)
     | FuncStmt a (Func' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
@@ -134,7 +133,6 @@ instance HasPosition Stmt where
     Cond p _ _ -> p
     CondElse p _ _ _ -> p
     While p _ _ -> p
-    SExp p _ -> p
     Print p _ -> p
     FuncStmt p _ -> p
 

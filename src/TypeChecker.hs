@@ -20,10 +20,9 @@ instance Show TType where
 type Env = Map.Map String TType
 data TCS = TCS {
     env :: Env,
-    func_ret :: Maybe TType,
-    block_ret :: Maybe TType
+    ret :: Maybe TType
 }
-initState = TCS { env = Map.empty, func_ret = Nothing, block_ret = Nothing }
+initState = TCS { env = Map.empty, ret = Nothing }
 -- TypeCheckerMonad --
 type TCM a = ExceptT Err (State TCS) a
 ------------------------------
@@ -57,12 +56,18 @@ tcProg :: [Func] -> TCM ()
 tcProg prog = mapM_ tcFunc prog
 
 tcFunc:: Func -> TCM ()
-tcFunc (FnDef _ t n args block) = do
+tcFunc (FnDef pos t n args block) = do
     insertType (getIdent n) (TFun (getType t) $ map getArgType args)
     state <- get
     mapM_ (\(ArgDec _ t_a n_a) -> insertType (getIdent n_a) (getType t_a)) args
-    modify (\st -> st {func_ret = Just $ getType t})
     tcBlock block
+    ret <- gets ret
+    case ret of
+        Just tt -> checkType pos (getType t) tt
+        Nothing -> throwError $ Err {
+            pos=pos,
+            reason="Function " ++ getIdent n ++ " does not return a value."
+            }
     put state
 
 tcBlock:: Block -> TCM ()
@@ -85,6 +90,17 @@ tcStmt (Ass pos n e) = do
                     pos=pos,
                     reason="Variable " ++ name ++ " is not initialized."
                     }
+tcStmt (Ret _ e) = do
+    t <- tcExp e
+    modify (\st -> st {ret = Just t})
+tcStmt (Cond pos e b) = do
+    tcExp e >>= checkType pos TBool >> tcBlock b
+tcStmt (CondElse pos e b1 b2) = do
+    tcExp e >>= checkType pos TBool >> tcBlock b1 >> tcBlock b2
+tcStmt (While pos e b) = do
+    tcExp e >>= checkType pos TBool >> tcBlock b
+tcStmt (Print _ _) = return ()
+tcStmt (FuncStmt _ f) = do tcFunc f
 
 tcExp:: Expr -> TCM TType
 tcExp (EVar pos n) = do
@@ -134,7 +150,7 @@ tcExp (EAdd pos e1 _ e2) = do
 tcExp (ERel pos e1 _ e2) = do
     tcExp e1 >>= checkType pos TInt
     tcExp e2 >>= checkType pos TInt
-    return TInt
+    return TBool
 tcExp (EAnd pos e1 e2) = do
     tcExp e1 >>= checkType pos TBool
     tcExp e2 >>= checkType pos TBool
