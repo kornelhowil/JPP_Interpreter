@@ -20,9 +20,10 @@ instance Show TType where
 type Env = Map.Map String TType
 data TCS = TCS {
     env :: Env,
-    ret :: Maybe TType
+    func_ret :: Maybe TType,
+    block_ret :: Maybe TType
 }
-initState = TCS { env = Map.empty, ret = Nothing }
+initState = TCS { env = Map.empty, func_ret = Nothing, block_ret = Nothing }
 -- TypeCheckerMonad --
 type TCM a = ExceptT Err (State TCS) a
 ------------------------------
@@ -47,9 +48,8 @@ checkType pos t1 t2 =
         reason="Types do not match. Expected type: " ++ show t1 ++ ". Actual type: " ++ show t2
         }
 
-getArgType :: Arg -> TType
-getArgType (ArgVal _ t _) = getType t
-getArgType (ArgVar _ t _) = getType t
+getArgType :: ArgDec -> TType
+getArgType (ArgDec _ t _) = getType t
 -----------------------------------
 ------ TypeChecker Functions ------
 -----------------------------------
@@ -60,10 +60,8 @@ tcFunc:: Func -> TCM ()
 tcFunc (FnDef _ t n args block) = do
     insertType (getIdent n) (TFun (getType t) $ map getArgType args)
     state <- get
-    mapM_ (\arg -> case arg of
-        ArgVal _ t_a n_a -> insertType (getIdent n_a) (getType t_a)
-        ArgVar _ t_a n_a -> insertType (getIdent n_a) (getType t_a)
-        ) args
+    mapM_ (\(ArgDec _ t_a n_a) -> insertType (getIdent n_a) (getType t_a)) args
+    modify (\st -> st {func_ret = Just $ getType t})
     tcBlock block
     put state
 
@@ -78,6 +76,15 @@ tcStmt (Decl _ t items) = mapM_ (\item -> do
         NoInit _ n -> insertType (getIdent n) tt
         Init pos n exp -> tcExp exp >>= checkType pos tt >> insertType (getIdent n) tt
     ) items
+tcStmt (Ass pos n e) = do
+    let name = getIdent n
+    env <- gets env
+    case Map.lookup name env of
+        Just t -> (tcExp e) >>= checkType pos t
+        Nothing -> throwError $ Err {
+                    pos=pos,
+                    reason="Variable " ++ name ++ " is not initialized."
+                    }
 
 tcExp:: Expr -> TCM TType
 tcExp (EVar pos n) = do
@@ -89,11 +96,27 @@ tcExp (EVar pos n) = do
                     pos=pos,
                     reason="Variable " ++ name ++ " is not initialized."
                     }
+-- tcExp (EArr _ _) TODO
+-- tcExp (EArVal _ _) TODO
 tcExp (EInt _ _) = return TInt
 tcExp (ETrue _) = return TBool
 tcExp (EFalse _) = return TBool
 tcExp (EString _ _) = return TStr
--- tcExp (EApp pos n args) TODO
+tcExp (EApp pos n args) = do
+    let name = getIdent n
+    env <- gets env
+    case Map.lookup name env of
+        Just (TFun t ts) -> do
+            argTypes <- mapM tcArg args
+            if ts == argTypes then return t
+            else throwError $ Err {
+                pos=pos,
+                reason="Function " ++ name ++ " called with wrong arguments."
+                }
+        Nothing -> throwError $ Err {
+            pos=pos,
+            reason="Function " ++ name ++ " is not defined."
+            }
 tcExp (Neg pos e) = do
     tcExp e >>= checkType pos TInt
     return TInt
@@ -121,7 +144,17 @@ tcExp (EOr pos e1 e2) = do
     tcExp e2 >>= checkType pos TBool
     return TBool
 
-
+tcArg:: Arg -> TCM TType
+tcArg (ArgVal _ e) = tcExp e
+tcArg (ArgVar pos n) = do
+    let name = getIdent n
+    env <- gets env
+    case Map.lookup name env of
+        Just x -> return x
+        Nothing -> throwError $ Err {
+                    pos=pos,
+                    reason="Variable " ++ name ++ " is not initialized."
+                    }
 
 runTCS s = runState s initState
 

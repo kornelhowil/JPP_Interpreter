@@ -23,11 +23,11 @@ data Program' a = Start a [Func' a]
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Func = Func' BNFC'Position
-data Func' a = FnDef a (Type' a) Ident [Arg' a] (Block' a)
+data Func' a = FnDef a (Type' a) Ident [ArgDec' a] (Block' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
-type Arg = Arg' BNFC'Position
-data Arg' a = ArgVal a (Type' a) Ident | ArgVar a (Type' a) Ident
+type ArgDec = ArgDec' BNFC'Position
+data ArgDec' a = ArgDec a (Type' a) Ident
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Block = Block' BNFC'Position
@@ -64,7 +64,7 @@ data Expr' a
     | EInt a Integer
     | ETrue a
     | EFalse a
-    | EApp a Ident [Expr' a]
+    | EApp a Ident [Arg' a]
     | EString a String
     | Neg a (Expr' a)
     | Not a (Expr' a)
@@ -73,6 +73,10 @@ data Expr' a
     | ERel a (Expr' a) (RelOp' a) (Expr' a)
     | EAnd a (Expr' a) (Expr' a)
     | EOr a (Expr' a) (Expr' a)
+  deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
+
+type Arg = Arg' BNFC'Position
+data Arg' a = ArgVal a (Expr' a) | ArgVar a Ident
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type AddOp = AddOp' BNFC'Position
@@ -113,10 +117,9 @@ instance HasPosition Func where
   hasPosition = \case
     FnDef p _ _ _ _ -> p
 
-instance HasPosition Arg where
+instance HasPosition ArgDec where
   hasPosition = \case
-    ArgVal p _ _ -> p
-    ArgVar p _ _ -> p
+    ArgDec p _ _ -> p
 
 instance HasPosition Block where
   hasPosition = \case
@@ -164,6 +167,11 @@ instance HasPosition Expr where
     ERel p _ _ _ -> p
     EAnd p _ _ -> p
     EOr p _ _ -> p
+
+instance HasPosition Arg where
+  hasPosition = \case
+    ArgVal p _ -> p
+    ArgVar p _ -> p
 
 instance HasPosition AddOp where
   hasPosition = \case
