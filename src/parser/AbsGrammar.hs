@@ -37,7 +37,6 @@ data Block' a = Block a [Stmt' a]
 type Stmt = Stmt' BNFC'Position
 data Stmt' a
     = Empty a
-    | BStmt a (Block' a)
     | Decl a (Type' a) [Item' a]
     | Ass a Ident (Expr' a)
     | Ret a (Expr' a)
@@ -62,9 +61,9 @@ data Expr' a
     = EArr a [Expr' a]
     | EArrVal a Ident [Expr' a]
     | EVar a Ident
-    | ELitInt a Integer
-    | ELitTrue a
-    | ELitFalse a
+    | EInt a Integer
+    | ETrue a
+    | EFalse a
     | EApp a Ident [Expr' a]
     | EString a String
     | Neg a (Expr' a)
@@ -126,7 +125,6 @@ instance HasPosition Block where
 instance HasPosition Stmt where
   hasPosition = \case
     Empty p -> p
-    BStmt p _ -> p
     Decl p _ _ -> p
     Ass p _ _ -> p
     Ret p _ -> p
@@ -154,9 +152,9 @@ instance HasPosition Expr where
     EArr p _ -> p
     EArrVal p _ _ -> p
     EVar p _ -> p
-    ELitInt p _ -> p
-    ELitTrue p -> p
-    ELitFalse p -> p
+    EInt p _ -> p
+    ETrue p -> p
+    EFalse p -> p
     EApp p _ _ -> p
     EString p _ -> p
     Neg p _ -> p

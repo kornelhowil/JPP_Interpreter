@@ -10,7 +10,8 @@ import Helper
 ----------------------------
 ------ Data and Types ------
 ----------------------------
-data TType = TInt | TStr | TBool | TFun TType [Arg] deriving Eq
+
+data TType = TInt | TStr | TBool | TFun TType [TType] deriving Eq
 instance Show TType where
     show TInt = "int"
     show TStr = "string"
@@ -27,34 +28,28 @@ type TCM a = ExceptT Err (State TCS) a
 ------------------------------
 ------ Helper Functions ------
 ------------------------------
-takeType :: Type -> TType
-takeType (Int _) = TInt
-takeType (Str _) = TStr
-takeType (Bool _) = TBool
+getType :: Type -> TType
+getType (Int _) = TInt
+getType (Str _) = TStr
+getType (Bool _) = TBool
 
 insertType :: String -> TType -> TCM ()
 insertType n t = modify (\s -> s { env = Map.insert n t (env s) })
-{-
-getType :: Pos -> String -> TCM TType
-getType pos name = do
-    env <- gets env 
-    case Map.lookup name env of
-        Just x -> return x
-        Nothing -> throwError $ Err {
-                    pos=pos,
-                    reason="Variable " ++ name ++ " is not initialized."
-                    }
--}
+
 -----------------------------------
 -------- Check Functions ----------
 -----------------------------------
-checkSameType:: Pos -> TType -> TType -> TCM ()
-checkSameType pos t1 t2 = 
+checkType:: Pos -> TType -> TType -> TCM ()
+checkType pos t1 t2 = 
     if t1 == t2 then return ()
     else throwError $ Err {
         pos=pos,
-        reason="Types do not match. Expected type: " ++ show t1 ++ "Actual type: " ++ show t2
+        reason="Types do not match. Expected type: " ++ show t1 ++ ". Actual type: " ++ show t2
         }
+
+getArgType :: Arg -> TType
+getArgType (ArgVal _ t _) = getType t
+getArgType (ArgVar _ t _) = getType t
 -----------------------------------
 ------ TypeChecker Functions ------
 -----------------------------------
@@ -63,11 +58,11 @@ tcProg prog = mapM_ tcFunc prog
 
 tcFunc:: Func -> TCM ()
 tcFunc (FnDef _ t n args block) = do
-    insertType (getIdent n) (TFun (takeType t) args)
+    insertType (getIdent n) (TFun (getType t) $ map getArgType args)
     state <- get
     mapM_ (\arg -> case arg of
-        ArgVal _ t_a n_a -> insertType (getIdent n_a) (takeType t_a)
-        ArgVar _ t_a n_a -> insertType (getIdent n_a) (takeType t_a)
+        ArgVal _ t_a n_a -> insertType (getIdent n_a) (getType t_a)
+        ArgVar _ t_a n_a -> insertType (getIdent n_a) (getType t_a)
         ) args
     tcBlock block
     put state
@@ -78,14 +73,13 @@ tcBlock (Block _ block) = mapM_ tcStmt block
 tcStmt:: Stmt -> TCM ()
 tcStmt (Empty _) = return ()
 tcStmt (Decl _ t items) = mapM_ (\item -> do
-    let tt = takeType t
+    let tt = getType t
     case item of 
         NoInit _ n -> insertType (getIdent n) tt
-        Init pos n exp -> tcExp exp >>= checkSameType pos tt >> insertType (getIdent n) tt
+        Init pos n exp -> tcExp exp >>= checkType pos tt >> insertType (getIdent n) tt
     ) items
 
 tcExp:: Expr -> TCM TType
---tcExp (EVar pos n) = getType pos (getIdent n)
 tcExp (EVar pos n) = do
     let name = getIdent n
     env <- gets env 
@@ -95,6 +89,39 @@ tcExp (EVar pos n) = do
                     pos=pos,
                     reason="Variable " ++ name ++ " is not initialized."
                     }
+tcExp (EInt _ _) = return TInt
+tcExp (ETrue _) = return TBool
+tcExp (EFalse _) = return TBool
+tcExp (EString _ _) = return TStr
+-- tcExp (EApp pos n args) TODO
+tcExp (Neg pos e) = do
+    tcExp e >>= checkType pos TInt
+    return TInt
+tcExp (Not pos e) = do
+    tcExp e >>= checkType pos TBool
+    return TBool
+tcExp (EMul pos e1 _ e2) = do
+    tcExp e1 >>= checkType pos TInt
+    tcExp e2 >>= checkType pos TInt
+    return TInt
+tcExp (EAdd pos e1 _ e2) = do
+    tcExp e1 >>= checkType pos TInt
+    tcExp e2 >>= checkType pos TInt
+    return TInt
+tcExp (ERel pos e1 _ e2) = do
+    tcExp e1 >>= checkType pos TInt
+    tcExp e2 >>= checkType pos TInt
+    return TInt
+tcExp (EAnd pos e1 e2) = do
+    tcExp e1 >>= checkType pos TBool
+    tcExp e2 >>= checkType pos TBool
+    return TBool
+tcExp (EOr pos e1 e2) = do
+    tcExp e1 >>= checkType pos TBool
+    tcExp e2 >>= checkType pos TBool
+    return TBool
+
+
 
 runTCS s = runState s initState
 
