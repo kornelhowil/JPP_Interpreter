@@ -19,11 +19,11 @@ import qualified Prelude as C
 import qualified Data.String
 
 type Program = Program' BNFC'Position
-data Program' a = Start a [Func' a]
+data Program' a = Start a [FnDef' a]
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
-type Func = Func' BNFC'Position
-data Func' a = FnDef a (Type' a) Ident [ArgDec' a] (Block' a)
+type FnDef = FnDef' BNFC'Position
+data FnDef' a = FnDef a (Type' a) Ident [ArgDec' a] (Block' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type ArgDec = ArgDec' BNFC'Position
@@ -44,11 +44,11 @@ data Stmt' a
     | CondElse a (Expr' a) (Block' a) (Block' a)
     | While a (Expr' a) (Block' a)
     | Print a (Expr' a)
-    | FuncStmt a (Func' a)
+    | FuncStmt a (FnDef' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Item = Item' BNFC'Position
-data Item' a = NoInit a Ident | Init a Ident (Expr' a)
+data Item' a = Item a Ident (Expr' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Type = Type' BNFC'Position
@@ -112,7 +112,7 @@ instance HasPosition Program where
   hasPosition = \case
     Start p _ -> p
 
-instance HasPosition Func where
+instance HasPosition FnDef where
   hasPosition = \case
     FnDef p _ _ _ _ -> p
 
@@ -138,8 +138,7 @@ instance HasPosition Stmt where
 
 instance HasPosition Item where
   hasPosition = \case
-    NoInit p _ -> p
-    Init p _ _ -> p
+    Item p _ _ -> p
 
 instance HasPosition Type where
   hasPosition = \case

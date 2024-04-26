@@ -20,9 +20,10 @@ instance Show TType where
 type Env = Map.Map String TType
 data TCS = TCS {
     env :: Env,
-    ret :: Maybe TType
+    ret1 :: Maybe TType,
+    ret2 :: Maybe TType
 }
-initState = TCS { env = Map.empty, ret = Nothing }
+initState = TCS { env = Map.empty, ret1 = Nothing, ret2 = Nothing }
 -- TypeCheckerMonad --
 type TCM a = ExceptT Err (State TCS) a
 ------------------------------
@@ -52,18 +53,28 @@ getArgType (ArgDec _ t _) = getType t
 -----------------------------------
 ------ TypeChecker Functions ------
 -----------------------------------
-tcProg :: [Func] -> TCM ()
-tcProg prog = mapM_ tcFunc prog
 
-tcFunc:: Func -> TCM ()
-tcFunc (FnDef pos t n args block) = do
+tcProg :: [FnDef] -> TCM ()
+tcProg prog = do 
+    mapM_ tcFnDef prog
+    env <- gets env
+    case Map.lookup "main" env of
+        Just (TFun TInt []) -> return ()
+        _ -> throwError $ Err {
+            pos=Nothing,
+            reason="Main function not found or has wrong type."
+            }
+
+tcFnDef:: FnDef -> TCM ()
+tcFnDef (FnDef pos t n args block) = do
     insertType (getIdent n) (TFun (getType t) $ map getArgType args)
     state <- get
     mapM_ (\(ArgDec _ t_a n_a) -> insertType (getIdent n_a) (getType t_a)) args
+    modify (\st -> st {ret1 = Just $ getType t})
     tcBlock block
-    ret <- gets ret
-    case ret of
-        Just tt -> checkType pos (getType t) tt
+    ret2 <- gets ret2
+    case ret2 of 
+        Just tr -> checkType pos (getType t) tr
         Nothing -> throwError $ Err {
             pos=pos,
             reason="Function " ++ getIdent n ++ " does not return a value."
@@ -75,11 +86,9 @@ tcBlock (Block _ block) = mapM_ tcStmt block
 
 tcStmt:: Stmt -> TCM ()
 tcStmt (Empty _) = return ()
-tcStmt (Decl _ t items) = mapM_ (\item -> do
+tcStmt (Decl _ t items) = mapM_ (\(Item pos n exp) -> do
     let tt = getType t
-    case item of 
-        NoInit _ n -> insertType (getIdent n) tt
-        Init pos n exp -> tcExp exp >>= checkType pos tt >> insertType (getIdent n) tt
+    tcExp exp >>= checkType pos tt >> insertType (getIdent n) tt
     ) items
 tcStmt (Ass pos n e) = do
     let name = getIdent n
@@ -90,9 +99,12 @@ tcStmt (Ass pos n e) = do
                     pos=pos,
                     reason="Variable " ++ name ++ " is not initialized."
                     }
-tcStmt (Ret _ e) = do
+tcStmt (Ret pos e) = do
     t <- tcExp e
-    modify (\st -> st {ret = Just t})
+    ret1 <- gets ret1
+    case ret1 of
+        Just tr -> checkType pos tr t
+    modify (\st -> st {ret2 = Just t})
 tcStmt (Cond pos e b) = do
     tcExp e >>= checkType pos TBool >> tcBlock b
 tcStmt (CondElse pos e b1 b2) = do
@@ -100,7 +112,7 @@ tcStmt (CondElse pos e b1 b2) = do
 tcStmt (While pos e b) = do
     tcExp e >>= checkType pos TBool >> tcBlock b
 tcStmt (Print _ _) = return ()
-tcStmt (FuncStmt _ f) = do tcFunc f
+tcStmt (FuncStmt _ f) = do tcFnDef f
 
 tcExp:: Expr -> TCM TType
 tcExp (EVar pos n) = do

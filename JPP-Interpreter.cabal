@@ -27,7 +27,7 @@ executable JPP-Interpreter
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules: AbsGrammar, LexGrammar, ParGrammar, TypeChecker, Helper
+    other-modules: AbsGrammar, LexGrammar, ParGrammar, TypeChecker, Helper, Interpreter
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
