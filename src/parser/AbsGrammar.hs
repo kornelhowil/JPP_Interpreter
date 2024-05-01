@@ -44,6 +44,7 @@ data Stmt' a
     | CondElse a (Expr' a) (Block' a) (Block' a)
     | While a (Expr' a) (Block' a)
     | Print a (Expr' a)
+    | Println a (Expr' a)
     | FuncStmt a (FnDef' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
@@ -134,6 +135,7 @@ instance HasPosition Stmt where
     CondElse p _ _ _ -> p
     While p _ _ -> p
     Print p _ -> p
+    Println p _ -> p
     FuncStmt p _ -> p
 
 instance HasPosition Item where

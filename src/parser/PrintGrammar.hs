@@ -180,6 +180,7 @@ instance Print (AbsGrammar.Stmt' a) where
     AbsGrammar.CondElse _ expr block1 block2 -> prPrec i 0 (concatD [doc (showString "if"), doc (showString "("), prt 0 expr, doc (showString ")"), prt 0 block1, doc (showString "else"), prt 0 block2])
     AbsGrammar.While _ expr block -> prPrec i 0 (concatD [doc (showString "while"), doc (showString "("), prt 0 expr, doc (showString ")"), prt 0 block])
     AbsGrammar.Print _ expr -> prPrec i 0 (concatD [doc (showString "print"), doc (showString "("), prt 0 expr, doc (showString ")"), doc (showString ";")])
+    AbsGrammar.Println _ expr -> prPrec i 0 (concatD [doc (showString "println"), doc (showString "("), prt 0 expr, doc (showString ")"), doc (showString ";")])
     AbsGrammar.FuncStmt _ fndef -> prPrec i 0 (concatD [prt 0 fndef])
 
 instance Print (AbsGrammar.Item' a) where

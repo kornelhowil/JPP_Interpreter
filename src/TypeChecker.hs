@@ -88,7 +88,13 @@ tcStmt:: Stmt -> TCM ()
 tcStmt (Empty _) = return ()
 tcStmt (Decl _ t items) = mapM_ (\(Item pos n exp) -> do
     let tt = getType t
-    tcExp exp >>= checkType pos tt >> insertType (getIdent n) tt
+    env <- gets env
+    case Map.lookup (getIdent n) env of
+        Just _ -> throwError $ Err {
+                    pos=pos,
+                    reason="Variable " ++ getIdent n ++ " already declared."
+                    }
+        Nothing -> tcExp exp >>= checkType pos tt >> insertType (getIdent n) tt
     ) items
 tcStmt (Ass pos n e) = do
     let name = getIdent n
@@ -111,8 +117,9 @@ tcStmt (CondElse pos e b1 b2) = do
     tcExp e >>= checkType pos TBool >> tcBlock b1 >> tcBlock b2
 tcStmt (While pos e b) = do
     tcExp e >>= checkType pos TBool >> tcBlock b
-tcStmt (Print _ _) = return ()
-tcStmt (FuncStmt _ f) = do tcFnDef f
+tcStmt (Print _ e) = tcExp e >> return ()
+tcStmt (Println _ e) = tcExp e >> return ()
+tcStmt (FuncStmt _ f) = tcFnDef f >> return ()
 
 tcExp:: Expr -> TCM TType
 tcExp (EVar pos n) = do
@@ -141,6 +148,10 @@ tcExp (EApp pos n args) = do
                 pos=pos,
                 reason="Function " ++ name ++ " called with wrong arguments."
                 }
+        Just _ -> throwError $ Err {
+            pos=pos,
+            reason="Variable " ++ name ++ " is not a function."
+            }
         Nothing -> throwError $ Err {
             pos=pos,
             reason="Function " ++ name ++ " is not defined."

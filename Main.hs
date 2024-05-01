@@ -5,7 +5,7 @@ import System.IO
 
 import ParGrammar
 
--- import Interpreter (ErrSt, interpret)
+import Interpreter (interpret)
 import TypeChecker (typeCheck)
 
 run :: String -> IO ()
@@ -13,8 +13,8 @@ run s = case pProgram $ myLexer s of
     Left p_err ->  hPutStrLn stderr $ "Parsing error: " ++ p_err
     Right parsed -> case typeCheck parsed of
         Left t_err -> hPutStrLn stderr $ "Type check error: " ++ show t_err
-        --Right _ -> interpret parsed
-        Right _ -> hPutStrLn stdout $ "Bajo Jajo"
+        Right _ -> interpret parsed
+        --Right _ -> hPutStrLn stdout $ "Bajo Jajo"
 
 main :: IO ()
 main = do

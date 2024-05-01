@@ -45,6 +45,7 @@ transStmt x = case x of
   AbsGrammar.CondElse _ expr block1 block2 -> failure x
   AbsGrammar.While _ expr block -> failure x
   AbsGrammar.Print _ expr -> failure x
+  AbsGrammar.Println _ expr -> failure x
   AbsGrammar.FuncStmt _ fndef -> failure x
 
 transItem :: Show a => AbsGrammar.Item' a -> Result

@@ -9,6 +9,12 @@ import AbsGrammar
 import Helper
 
 data Value = VInt Integer | VStr String | VBool Bool
+instance Show Value where
+    show v = case v of
+        VInt x -> show x
+        VStr x -> show x
+        VBool x -> if x then "true" else "false"
+
 type Func = [Arg] -> IM Value
 
 type Namespace = Map.Map String Int
@@ -37,8 +43,14 @@ insertVal loc v = modify (\s -> s { vals = Map.insert loc v (vals s) })
 getLoc :: String -> IM Int
 getLoc n = do
     ns <- gets names
-    let (Just loc) = Map.lookup n ns
-    return loc
+    -- let (Just loc) = Map.lookup n ns
+    case (Map.lookup n ns) of
+        Just loc -> return loc
+        Nothing -> throwError $ Err {
+            pos=Nothing,
+            reason= n ++ " not declared."
+        }
+    --return loc
 
 getFunc :: Int -> IM Func
 getFunc loc = do
@@ -90,7 +102,7 @@ evalFnDef (FnDef pos t n argdecs block) = do
     insertName loc $ getIdent n
     insertFunc loc (\args -> do
         ns' <- gets names
-        setNamespace ns
+        --setNamespace ns
         mapM_ (insertArg ns') $ zip argdecs args
         res <- evalBlock block
         setNamespace ns'
@@ -119,6 +131,38 @@ evalBlock (Block _ stmts) = do
 
 evalStmt :: Stmt -> IM (Maybe Value)
 evalStmt (Empty _) = return Nothing
+evalStmt (Decl _ t items) = do
+    mapM_ (\(Item pos n exp) -> do
+        loc <- newloc
+        insertName loc $ getIdent n
+        v <- evalExp exp
+        insertVal loc v
+        ) items >> return Nothing
+evalStmt (Ass _ n exp) = do
+    loc <- getLoc $ getIdent n
+    v <- evalExp exp
+    insertVal loc v
+    return Nothing
+evalStmt (Ret _ exp) = do
+    v <- evalExp exp
+    return $ Just v
+evalStmt (Cond _ exp b) = do
+    VBool v <- evalExp exp
+    if v then evalBlock b else return Nothing
+evalStmt (CondElse _ exp b1 b2) = do
+    VBool v <- evalExp exp
+    if v then evalBlock b1 else evalBlock b2
+evalStmt (While pos exp b) = do
+    VBool v <- evalExp exp
+    if v then do
+        r <- evalBlock b
+        case r of
+            Nothing -> evalStmt (While pos exp b)
+    else return Nothing
+evalStmt (Print _ exp) = do
+    evalExp exp >>= liftIO . putStr . show >> return Nothing
+evalStmt (Println _ exp) = do
+    evalExp exp >>= liftIO . putStrLn . show >> return Nothing
 
 evalExp :: Expr -> IM Value
 evalExp (EVar _ n) = do
@@ -138,13 +182,23 @@ evalExp (Neg _ e) = do
 evalExp (Not _ e) = do
     (VBool x) <- evalExp e
     return $ VBool $ not x
-evalExp (EMul _ e1 op e2) = do
+evalExp (EMul pos e1 op e2) = do
     (VInt x) <- evalExp e1
     (VInt y) <- evalExp e2
     case op of
         Times _ -> return $ VInt $ x * y
-        Div _ -> return $ VInt $ x `div` y
-        Mod _ -> return $ VInt $ x `mod` y
+        Div _ -> case y of
+            0 -> throwError $ Err {
+                    pos=pos,
+                    reason="Division by zero."
+                    }
+            _ -> return $ VInt $ x `div` y
+        Mod _ -> case y of
+            0 -> throwError $ Err {
+                    pos=pos,
+                    reason="Modulo by zero."
+                    }
+            _ -> return $ VInt $ x `mod` y
 evalExp (EAdd _ e1 op e2) = do
     (VInt x) <- evalExp e1
     (VInt y) <- evalExp e2
@@ -173,13 +227,9 @@ evalExp (EOr _ e1 e2) = do
 
 runIS s = execStateT s initState
 
---runIM :: IM a -> (Either Err a, TCS)
 runIM = runIS . runExceptT
 
 interpret :: Program -> IO ()
 interpret (Start _ prg) = do
     runIM (catchError (evalPrg prg) handleErr)
     return ()
-
-
--- Domyślny return brzmi spoko
