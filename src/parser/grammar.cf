@@ -1,15 +1,14 @@
 -- programs ------------------------------------------------
 
 entrypoints Program ;
-Start.   Program ::= [Func] ;
+Start.   Program ::= [FnDef] ;
 
 -- functions ------------------------------------------------
 
-FnDef.	   Func ::= Type Ident "(" [Arg] ")" Block ;
-separator nonempty Func "" ;
-ArgVal. 	   Arg ::= Type Ident;
-ArgVar.    Arg ::= "var" Type Ident;
-separator  Arg "," ;
+FnDef.	   FnDef ::= Type Ident "(" [ArgDec] ")" Block ;
+separator nonempty FnDef "" ;
+ArgDec.    ArgDec ::= Type Ident;
+separator  ArgDec "," ;
 
 -- statements ----------------------------------------------
 
@@ -17,17 +16,16 @@ Block.     Block ::= "{" [Stmt] "}" ;
 separator  Stmt "" ;
 Empty.     Stmt ::= ";" ;
 Decl.      Stmt ::= Type [Item] ";" ;
-NoInit.    Item ::= Ident ;
-Init.      Item ::= Ident "=" Expr ;
+Item.      Item ::= Ident "=" Expr ;
 separator nonempty Item "," ;
 Ass.       Stmt ::= Ident "=" Expr  ";" ;
 Ret.       Stmt ::= "return" Expr ";" ;
-Cond.      Stmt ::= "if" "(" Expr ")" Stmt  ;
-CondElse.  Stmt ::= "if" "(" Expr ")" Stmt "else" Stmt  ;
-While.     Stmt ::= "while" "(" Expr ")" Stmt ;
-SExp.      Stmt ::= Expr  ";" ;
+Cond.      Stmt ::= "if" "(" Expr ")" Block  ;
+CondElse.  Stmt ::= "if" "(" Expr ")" Block "else" Block  ;
+While.     Stmt ::= "while" "(" Expr ")" Block ;
 Print.     Stmt ::= "print" "(" Expr ")" ";" ;
-FuncStmt.      Stmt ::= Func ;
+Println.     Stmt ::= "println" "(" Expr ")" ";" ;
+FuncStmt.  Stmt ::= FnDef ;
 
 -- Types ---------------------------------------------------
 
@@ -44,7 +42,7 @@ EVar.      Expr6 ::= Ident ;
 EInt.      Expr6 ::= Integer ;
 ETrue.     Expr6 ::= "true" ;
 EFalse.    Expr6 ::= "false" ;
-EApp.      Expr6 ::= Ident "(" [Expr] ")" ;
+EApp.      Expr6 ::= Ident "(" [Arg] ")" ;
 EString.   Expr6 ::= String ;
 Neg.       Expr5 ::= "-" Expr6 ;
 Not.       Expr5 ::= "!" Expr6 ;
@@ -55,6 +53,10 @@ EAnd.      Expr1 ::= Expr2 "&&" Expr1 ;
 EOr.       Expr ::= Expr1 "||" Expr ;
 coercions  Expr 6 ;
 separator  Expr "," ;
+
+ArgVal.    Arg ::= Expr ;
+ArgVar.    Arg ::= "var" Ident ;
+separator  Arg "," ;
 
 -- operators -----------------------------------------------
 
