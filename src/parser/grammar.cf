@@ -24,8 +24,9 @@ Cond.      Stmt ::= "if" "(" Expr ")" Block  ;
 CondElse.  Stmt ::= "if" "(" Expr ")" Block "else" Block  ;
 While.     Stmt ::= "while" "(" Expr ")" Block ;
 Print.     Stmt ::= "print" "(" Expr ")" ";" ;
-Println.     Stmt ::= "println" "(" Expr ")" ";" ;
+Println.   Stmt ::= "println" "(" Expr ")" ";" ;
 FuncStmt.  Stmt ::= FnDef ;
+App.       Stmt ::= Expr ;
 
 -- Types ---------------------------------------------------
 

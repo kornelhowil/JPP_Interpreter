@@ -12,9 +12,8 @@ run :: String -> IO ()
 run s = case pProgram $ myLexer s of
     Left p_err ->  hPutStrLn stderr $ "Parsing error: " ++ p_err
     Right parsed -> case typeCheck parsed of
-        Left t_err -> hPutStrLn stderr $ "Type check error: " ++ show t_err
+        Left t_err -> hPutStrLn stderr $ "Static error: " ++ show t_err
         Right _ -> interpret parsed
-        --Right _ -> hPutStrLn stdout $ "Bajo Jajo"
 
 main :: IO ()
 main = do
