@@ -33,12 +33,9 @@ App.       Stmt ::= Expr ;
 Int.       Type ::= "int" ;
 Str.       Type ::= "string" ;
 Bool.      Type ::= "bool" ;
-Array.     Type ::= Type "[" Expr "]" ;
 
 -- Expressions ---------------------------------------------
 
-EArr.      Expr6 ::= "[" [Expr] "]" ;
-EArrVal.   Expr6 ::= Ident "[" [Expr] "]" ;
 EVar.      Expr6 ::= Ident ;
 EInt.      Expr6 ::= Integer ;
 ETrue.     Expr6 ::= "true" ;

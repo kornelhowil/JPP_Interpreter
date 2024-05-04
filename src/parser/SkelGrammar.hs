@@ -58,12 +58,9 @@ transType x = case x of
   AbsGrammar.Int _ -> failure x
   AbsGrammar.Str _ -> failure x
   AbsGrammar.Bool _ -> failure x
-  AbsGrammar.Array _ type_ expr -> failure x
 
 transExpr :: Show a => AbsGrammar.Expr' a -> Result
 transExpr x = case x of
-  AbsGrammar.EArr _ exprs -> failure x
-  AbsGrammar.EArrVal _ ident exprs -> failure x
   AbsGrammar.EVar _ ident -> failure x
   AbsGrammar.EInt _ integer -> failure x
   AbsGrammar.ETrue _ -> failure x

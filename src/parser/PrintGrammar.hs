@@ -198,12 +198,9 @@ instance Print (AbsGrammar.Type' a) where
     AbsGrammar.Int _ -> prPrec i 0 (concatD [doc (showString "int")])
     AbsGrammar.Str _ -> prPrec i 0 (concatD [doc (showString "string")])
     AbsGrammar.Bool _ -> prPrec i 0 (concatD [doc (showString "bool")])
-    AbsGrammar.Array _ type_ expr -> prPrec i 0 (concatD [prt 0 type_, doc (showString "["), prt 0 expr, doc (showString "]")])
 
 instance Print (AbsGrammar.Expr' a) where
   prt i = \case
-    AbsGrammar.EArr _ exprs -> prPrec i 6 (concatD [doc (showString "["), prt 0 exprs, doc (showString "]")])
-    AbsGrammar.EArrVal _ id_ exprs -> prPrec i 6 (concatD [prt 0 id_, doc (showString "["), prt 0 exprs, doc (showString "]")])
     AbsGrammar.EVar _ id_ -> prPrec i 6 (concatD [prt 0 id_])
     AbsGrammar.EInt _ n -> prPrec i 6 (concatD [prt 0 n])
     AbsGrammar.ETrue _ -> prPrec i 6 (concatD [doc (showString "true")])

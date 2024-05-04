@@ -54,14 +54,12 @@ data Item' a = Item a Ident (Expr' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Type = Type' BNFC'Position
-data Type' a = Int a | Str a | Bool a | Array a (Type' a) (Expr' a)
+data Type' a = Int a | Str a | Bool a
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Expr = Expr' BNFC'Position
 data Expr' a
-    = EArr a [Expr' a]
-    | EArrVal a Ident [Expr' a]
-    | EVar a Ident
+    = EVar a Ident
     | EInt a Integer
     | ETrue a
     | EFalse a
@@ -149,12 +147,9 @@ instance HasPosition Type where
     Int p -> p
     Str p -> p
     Bool p -> p
-    Array p _ _ -> p
 
 instance HasPosition Expr where
   hasPosition = \case
-    EArr p _ -> p
-    EArrVal p _ _ -> p
     EVar p _ -> p
     EInt p _ -> p
     ETrue p -> p
