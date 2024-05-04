@@ -10,9 +10,9 @@ import TypeChecker (typeCheck)
 
 runInterpreter :: String -> IO ()
 runInterpreter s = case pProgram $ myLexer s of
-    Left p_err ->  hPutStrLn stderr $ "Parsing error: " ++ p_err
+    Left err ->  hPutStrLn stderr $ "Parsing error: " ++ err
     Right parsed -> case typeCheck parsed of
-        Left t_err -> hPutStrLn stderr $ "Static error: " ++ show t_err
+        Left err -> hPutStrLn stderr $ "Static error: " ++ show err
         Right _ -> interpret parsed
 
 main :: IO ()
