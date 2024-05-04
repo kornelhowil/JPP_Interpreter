@@ -1,0 +1,20 @@
+int test0() {
+    println("W srodku test0");
+    int test1() {
+        println("W srodku test1 w srodku test0");
+        return 0;
+    }
+    test1();
+    return 0;
+}
+
+int main() {
+    println("W srodku main");
+    int test1() {
+        println("W srodku test1 w srodku main");
+        return 0;
+    }
+    test0();
+    test1();
+    return 0;
+}

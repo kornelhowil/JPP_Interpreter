@@ -182,6 +182,7 @@ instance Print (AbsGrammar.Stmt' a) where
     AbsGrammar.Print _ expr -> prPrec i 0 (concatD [doc (showString "print"), doc (showString "("), prt 0 expr, doc (showString ")"), doc (showString ";")])
     AbsGrammar.Println _ expr -> prPrec i 0 (concatD [doc (showString "println"), doc (showString "("), prt 0 expr, doc (showString ")"), doc (showString ";")])
     AbsGrammar.FuncStmt _ fndef -> prPrec i 0 (concatD [prt 0 fndef])
+    AbsGrammar.App _ expr -> prPrec i 0 (concatD [prt 0 expr])
 
 instance Print (AbsGrammar.Item' a) where
   prt i = \case

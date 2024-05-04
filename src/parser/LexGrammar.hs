@@ -214,13 +214,14 @@ resWords =
        (b "<=" 14
           (b ";" 12 (b "/" 11 (b "-" 10 N N) N) (b "<" 13 N N))
           (b "==" 16 (b "=" 15 N N) (b ">" 17 N N))))
-    (b "return" 27
+    (b "println" 27
        (b "false" 23
           (b "bool" 21 (b "]" 20 (b "[" 19 N N) N) (b "else" 22 N N))
           (b "int" 25 (b "if" 24 N N) (b "print" 26 N N)))
-       (b "while" 31
-          (b "true" 29 (b "string" 28 N N) (b "var" 30 N N))
-          (b "||" 33 (b "{" 32 N N) (b "}" 34 N N))))
+       (b "while" 32
+          (b "true" 30
+             (b "string" 29 (b "return" 28 N N) N) (b "var" 31 N N))
+          (b "||" 34 (b "{" 33 N N) (b "}" 35 N N))))
   where
   b s n = B bs (TS bs n)
     where

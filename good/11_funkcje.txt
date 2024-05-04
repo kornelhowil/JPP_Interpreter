@@ -1,0 +1,18 @@
+int f_int(int i) {
+    return i;
+}
+
+bool f_bool(bool b) {
+    return b;
+}
+
+string f_string(string s) {
+    return s;
+}
+
+int main() {
+    println(f_int(10)); # 10
+    println(f_string("kaczka")); # kaczka
+    println(f_bool(true)); # true
+    return 0;
+}

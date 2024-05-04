@@ -1,0 +1,10 @@
+int main() {
+    string s = "kaczka";
+    int i = 1;
+    bool b = true;
+
+    println(s);
+    println(i);
+    println(b);
+    return 0;
+}

@@ -1,0 +1,21 @@
+int main() {
+    int i = 10;
+    while (i > 0) {
+        print(i);
+        if (i > 5) {
+            println(" to wiecej niz 5");
+        }
+        else {
+            println(" to nie wiecej niz 5");
+        }
+        i = i - 1;
+    }
+
+    if (true) {
+        println("If bez else");
+    }
+    if (false) {
+        println("Jajo");
+    }
+    return 0;
+}

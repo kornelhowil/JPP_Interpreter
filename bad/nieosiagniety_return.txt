@@ -1,0 +1,10 @@
+int f(){
+    if(false) {
+        return 1;
+    }
+}
+
+int main() {
+    f(); # f function does not return a value in all control paths.
+    return 0;
+}

@@ -1,0 +1,4 @@
+int main() {
+    print(5 / 0); # Division by zero.
+    return 0;
+}

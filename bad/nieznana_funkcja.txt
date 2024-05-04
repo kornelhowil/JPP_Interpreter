@@ -1,0 +1,4 @@
+int main() {
+    f(); # Function f is not defined.
+    return 0;
+}

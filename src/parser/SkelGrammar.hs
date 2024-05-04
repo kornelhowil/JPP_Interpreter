@@ -47,6 +47,7 @@ transStmt x = case x of
   AbsGrammar.Print _ expr -> failure x
   AbsGrammar.Println _ expr -> failure x
   AbsGrammar.FuncStmt _ fndef -> failure x
+  AbsGrammar.App _ expr -> failure x
 
 transItem :: Show a => AbsGrammar.Item' a -> Result
 transItem x = case x of

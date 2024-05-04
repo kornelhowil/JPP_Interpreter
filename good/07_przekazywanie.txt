@@ -1,0 +1,19 @@
+int test(int a, int b) {
+    a = a + 1;
+    b = b + 1;
+    return 0;
+}
+
+
+int main() {
+    int a = 1;
+    int b = 1;
+    println("Przed wywolaniem funkcji");
+    println(a); # 1
+    println(b); # 1
+    int k = test(var a, b);
+    println("Po wywolaniu funkcji");
+    println(a); # 2
+    println(b); # 1
+    return 0; 
+}

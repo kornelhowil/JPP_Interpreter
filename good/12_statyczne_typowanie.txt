@@ -1,0 +1,4 @@
+int main () {
+    int a = "kaczka"; # Type check error
+    return 0;
+}

@@ -12,7 +12,7 @@ data Value = VInt Integer | VStr String | VBool Bool
 instance Show Value where
     show v = case v of
         VInt x -> show x
-        VStr x -> show x
+        VStr x -> x
         VBool x -> if x then "true" else "false"
 
 type Func = [Arg] -> IM Value
@@ -163,6 +163,10 @@ evalStmt (Print _ exp) = do
     evalExp exp >>= liftIO . putStr . show >> return Nothing
 evalStmt (Println _ exp) = do
     evalExp exp >>= liftIO . putStrLn . show >> return Nothing
+evalStmt (App _ exp) = do
+    evalExp exp >> return Nothing
+evalStmt (FuncStmt _ def) = do
+    evalFnDef def >> return Nothing
 
 evalExp :: Expr -> IM Value
 evalExp (EVar _ n) = do

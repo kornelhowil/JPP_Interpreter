@@ -1,0 +1,6 @@
+int main() {
+    if ("kaczka") { # Types do not match. Expected type: bool. Actual type: string
+        return 0;
+    }
+    return 0;
+}

@@ -120,6 +120,12 @@ tcStmt (While pos e b) = do
 tcStmt (Print _ e) = tcExp e >> return ()
 tcStmt (Println _ e) = tcExp e >> return ()
 tcStmt (FuncStmt _ f) = tcFnDef f >> return ()
+tcStmt (App pos e) = case e of
+    EApp _ _ _ -> tcExp e >> return ()
+    _ -> throwError $ Err {
+                    pos=pos,
+                    reason="This is not correct function call."
+                    }
 
 tcExp:: Expr -> TCM TType
 tcExp (EVar pos n) = do

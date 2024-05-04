@@ -1,0 +1,8 @@
+int f(){
+    return true; # Types do not match. Expected type: int. Actual type: bool
+}
+
+int main() {
+    f();
+    return 0;
+}

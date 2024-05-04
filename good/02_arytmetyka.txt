@@ -1,0 +1,46 @@
+int main() {
+    int a = 5;
+    print("5 > 5: ");
+    println(a > 5);
+    print("5 < 5: ");
+    println(a < 5);
+    print("5 == 5: ");
+    println(a == 5);
+    print("5 <= 5: ");
+    println(a <= 5);
+    print("5 >= 5: ");
+    println(a >= 5);
+
+    print("5 + 5 = ");
+    println(5+5);
+    print("5 * 5 = ");
+    println(5*5);
+    print("5 / 5 = ");
+    println(5/5);
+    print("5 % 5 = ");
+    println(5%5);
+
+    print("true && true = ");
+    println(true && true);
+    print("true && false = ");
+    println(true && false);
+    print("false && true = ");
+    println(false && true);
+    print("false && false = ");
+    println(false && false);
+    print("true || true = ");
+    println(true || true);
+    print("true || false = ");
+    println(true || false);
+    print("false || true = ");
+    println(false || true);
+    print("false || false = ");
+    println(false || false);
+
+    print("!true = ");
+    println(! true);
+    print("!false = ");
+    println(! false);
+
+    return 0;
+}

@@ -46,6 +46,7 @@ data Stmt' a
     | Print a (Expr' a)
     | Println a (Expr' a)
     | FuncStmt a (FnDef' a)
+    | App a (Expr' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Item = Item' BNFC'Position
@@ -137,6 +138,7 @@ instance HasPosition Stmt where
     Print p _ -> p
     Println p _ -> p
     FuncStmt p _ -> p
+    App p _ -> p
 
 instance HasPosition Item where
   hasPosition = \case

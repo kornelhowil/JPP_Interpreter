@@ -1,0 +1,5 @@
+int main() {
+    print("print nie robi nowej linii,");
+    println(" a println robi");
+    return 0;
+}
