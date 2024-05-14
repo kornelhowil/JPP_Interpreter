@@ -1,5 +1,5 @@
 module Helper where
-import AbsGrammar
+import Grammar.Abs
 
 type Pos = BNFC'Position
 

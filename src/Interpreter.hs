@@ -5,7 +5,7 @@ import Control.Monad.State
 import qualified Data.Map as Map
 import System.IO
 -- Grammar
-import AbsGrammar
+import Grammar.Abs
 import Helper
 
 data Value = VInt Integer | VStr String | VBool Bool
@@ -102,7 +102,6 @@ evalFnDef (FnDef pos t n argdecs block) = do
     insertName loc $ getIdent n
     insertFunc loc (\args -> do
         ns' <- gets names
-        --setNamespace ns
         mapM_ (insertArg ns') $ zip argdecs args
         res <- evalBlock block
         setNamespace ns'

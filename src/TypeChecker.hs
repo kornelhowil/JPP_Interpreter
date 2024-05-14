@@ -5,7 +5,7 @@ import Control.Monad.State
 import qualified Data.Map as Map
 import System.IO
 -- Grammar
-import AbsGrammar
+import Grammar.Abs
 import Helper
 ----------------------------
 ------ Data and Types ------

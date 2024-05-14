@@ -3,7 +3,7 @@ module Main where
 import System.Environment
 import System.IO
 
-import ParGrammar
+import Grammar.Par
 
 import Interpreter (interpret)
 import TypeChecker (typeCheck)
