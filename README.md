@@ -21,6 +21,9 @@ Główne nieoczywiste zasady poprawności programów:
 - Aby przekazać argument do funkcji poprzez referencję należy poprzedzić zmienną słowem kluczowym ```var```
 - print() wypisuje na wyjście standardowe bez znaku nowej linii
 - println() wypisuje na wyjście standardowe ze znakiem nowej linii
+- Zmienne nie mogą być niezainicjowane, tzn. ```int a;``` nie przechodzi, ale ```int a = 5;``` już tak
+
+Przykłady użycia znajdują się w folderze ```good```.
 
 ## Tabelka cech
 Na 15 punktów
