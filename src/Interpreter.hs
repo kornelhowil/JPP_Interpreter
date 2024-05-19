@@ -40,17 +40,15 @@ insertName loc n = modify (\s -> s { names = Map.insert n loc (names s) })
 insertVal :: Int -> Value -> IM ()
 insertVal loc v = modify (\s -> s { vals = Map.insert loc v (vals s) })
 
-getLoc :: String -> IM Int
-getLoc n = do
+getLoc :: Pos -> String -> IM Int
+getLoc pos n = do
     ns <- gets names
-    -- let (Just loc) = Map.lookup n ns
     case (Map.lookup n ns) of
         Just loc -> return loc
         Nothing -> throwError $ Err {
-            pos=Nothing,
+            pos=pos,
             reason= n ++ " not declared."
         }
-    --return loc
 
 getFunc :: Int -> IM Func
 getFunc loc = do
@@ -75,7 +73,7 @@ insertArg ns (ArgDec _ t n, ArgVal _ e) = do
     insertVal loc $ v
 insertArg ns (ArgDec _ _ n1, ArgVar _ n2) = do
     let (Just loc) = Map.lookup (getIdent n2) ns
-    insertName loc $ getIdent n2
+    insertName loc $ getIdent n1
 
 newloc :: IM Int
 newloc = do
@@ -88,7 +86,7 @@ handleErr err = do
 
 evalMain :: IM ()
 evalMain = do
-    loc <- getLoc "main" 
+    loc <- getLoc Nothing "main" 
     main <- getFunc loc
     main [] >> return ()
 
@@ -137,8 +135,8 @@ evalStmt (Decl _ t items) = do
         v <- evalExp exp
         insertVal loc v
         ) items >> return Nothing
-evalStmt (Ass _ n exp) = do
-    loc <- getLoc $ getIdent n
+evalStmt (Ass pos n exp) = do
+    loc <- getLoc pos $ getIdent n
     v <- evalExp exp
     insertVal loc v
     return Nothing
@@ -157,6 +155,7 @@ evalStmt (While pos exp b) = do
         r <- evalBlock b
         case r of
             Nothing -> evalStmt (While pos exp b)
+            Just x -> return (Just x)
     else return Nothing
 evalStmt (Print _ exp) = do
     evalExp exp >>= liftIO . putStr . show >> return Nothing
@@ -168,15 +167,15 @@ evalStmt (FuncStmt _ def) = do
     evalFnDef def >> return Nothing
 
 evalExp :: Expr -> IM Value
-evalExp (EVar _ n) = do
-    loc <- getLoc $ getIdent n
+evalExp (EVar pos n) = do
+    loc <- getLoc pos $ getIdent n
     getVal loc
 evalExp (EInt _ i) = return $ VInt i
 evalExp (ETrue _) = return $ VBool True
 evalExp (EFalse _) = return $ VBool False
 evalExp (EString _ s) = return $ VStr s
-evalExp (EApp _ n args) = do
-    loc <- getLoc $ getIdent n
+evalExp (EApp pos n args) = do
+    loc <- getLoc pos $ getIdent n
     func <- getFunc loc
     func args
 evalExp (Neg _ e) = do
