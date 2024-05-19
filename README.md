@@ -4,6 +4,10 @@ Interpreter interpretuje język będący zmodyfikowaną wersją języka Latte.
 ```
 make
 ```
+Kompilacja zaczyna się od wygenerowania parsera gramatyki przy użyciu bnfc. Aby usunąć powstałe pliki wystarczy wykonać
+```
+make clean
+```
 Aby wykonać program zapisany w pliku ```prog.txt``` należy wykonać
 ```
 ./interpreter prog.txt
