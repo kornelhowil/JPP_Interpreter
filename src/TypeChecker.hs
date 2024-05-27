@@ -88,13 +88,7 @@ tcStmt:: Stmt -> TCM ()
 tcStmt (Empty _) = return ()
 tcStmt (Decl _ t items) = mapM_ (\(Item pos n exp) -> do
     let tt = getType t
-    env <- gets env
-    case Map.lookup (getIdent n) env of
-        Just _ -> throwError $ Err {
-                    pos=pos,
-                    reason="Variable " ++ getIdent n ++ " already declared."
-                    }
-        Nothing -> tcExp exp >>= checkType pos tt >> insertType (getIdent n) tt
+    tcExp exp >>= checkType pos tt >> insertType (getIdent n) tt
     ) items
 tcStmt (Ass pos n e) = do
     let name = getIdent n

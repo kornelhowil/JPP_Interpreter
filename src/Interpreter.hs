@@ -130,10 +130,10 @@ evalStmt :: Stmt -> IM (Maybe Value)
 evalStmt (Empty _) = return Nothing
 evalStmt (Decl _ t items) = do
     mapM_ (\(Item pos n exp) -> do
+        ns <- gets names
         loc <- newloc
         insertName loc $ getIdent n
-        v <- evalExp exp
-        insertVal loc v
+        evalExp exp >>= insertVal loc
         ) items >> return Nothing
 evalStmt (Ass pos n exp) = do
     loc <- getLoc pos $ getIdent n
