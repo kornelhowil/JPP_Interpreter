@@ -33,8 +33,6 @@ State 22, State 50: "Ident . (" Nawias może być interpretowany jako część 
 
 State 32, State 92: "Expr3 . -"  minus może być intepretowany jako początek wartości ujemnej lub jako odejmowanie. Wybierane jest to drugie czyli dobrze.
 
-Przykłady użycia znajdują się w folderze ```good```.
-
 ## Poprawki w drugim terminie
 1. Uniemożliwniono powtórki w nazwach parametrów w definicji funkcji
 2. Print działa tylko dla typów prostych
@@ -44,6 +42,10 @@ Przykłady użycia znajdują się w folderze ```good```.
 6. Praktycznie wszystkie złe przykłady przerobiono i dodano nowe tak, aby każdy możliwy błąd miał przykład.
 7. Dodano przykłady good/09_2 i good/09_3 na statyczne wiązanie
 8. Dodano porównania i konktatencja stringów do good/02
+
+## Przyklady
+Przykłady użycia znajdują się w folderze ```good```.
+W folderze ```bad``` znajdują się przykłady wszystkich błędów.
 
 ## Tabelka cech
 Na 15 punktów
