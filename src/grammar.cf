@@ -50,7 +50,6 @@ ERel.      Expr2 ::= Expr2 RelOp Expr3 ;
 EAnd.      Expr1 ::= Expr2 "&&" Expr1 ;
 EOr.       Expr ::= Expr1 "||" Expr ;
 coercions  Expr 6 ;
-separator  Expr "," ;
 
 ArgVal.    Arg ::= Expr ;
 ArgVar.    Arg ::= "var" Ident ;

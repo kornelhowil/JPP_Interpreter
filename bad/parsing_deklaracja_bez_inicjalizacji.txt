@@ -1,0 +1,5 @@
+# Parsing error: syntax error at line 3, column 10 before `;'
+int main() {
+    int a;
+    return 0;
+}

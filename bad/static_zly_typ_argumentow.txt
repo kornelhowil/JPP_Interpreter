@@ -1,0 +1,8 @@
+# Static error: 7:12 Function f called with wrong arguments.
+int f(int a, int b) {
+    return 0;
+}
+
+int main() {
+    return f(1, "string");
+}

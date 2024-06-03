@@ -1,5 +1,0 @@
-int main() {
-    int a = 5;
-    a = false; # Types do not match. Expected type: int. Actual type: bool
-    return 0;
-}

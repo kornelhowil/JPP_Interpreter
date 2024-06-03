@@ -1,0 +1,5 @@
+# Runtime error: 3:11 Division by zero.
+int main() {
+    print(5 / 0);
+    return 0;
+}

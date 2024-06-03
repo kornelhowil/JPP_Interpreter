@@ -1,0 +1,17 @@
+int main () {
+        int a = 3;
+        int fun() {
+                println(a);
+                return 0;
+        }
+        int fun2() {
+                int a = 4; # deklaracja dziala tylko w obrebie nawiasow, wiec nie wplywa na fun
+                fun();
+                return 0;
+        }
+        fun(); # powinno wypisac 3
+        a = 5;
+        fun(); # powinno wypisac 5
+        fun2(); # powinno wypisac 5
+        return 0;
+}

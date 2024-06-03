@@ -1,0 +1,6 @@
+# Static error: 4:5 This is not correct function call.
+int main() {
+    int a = 5;
+    a;
+    return 0;
+}

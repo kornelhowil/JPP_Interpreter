@@ -1,0 +1,5 @@
+# Static error: 3:11 Cannot add bool and bool
+int main() {
+    print(true + false);
+    return 0;
+}

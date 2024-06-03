@@ -1,4 +1,0 @@
-int main() {
-    print(5 % 0); # Modulo by zero.
-    return 0;
-}

@@ -1,0 +1,6 @@
+# Static error: 4:5 Types do not match. Expected type: int. Actual type: bool
+int main() {
+    int a = 5;
+    a = false;
+    return 0;
+}

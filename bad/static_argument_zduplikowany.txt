@@ -1,0 +1,8 @@
+# Static error: 7:5 Printing functions is not allowed
+int f(int a, int a) {
+    return 0;
+}
+
+int main() {
+    return 0;
+}

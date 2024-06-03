@@ -56,8 +56,12 @@ int main() {
     println(true != false);
     println("\n");
 
-    print("bajo + jajo = ");
+    print("'bajo' + 'jajo' = ");
     println("bajo" + "jajo");
+    println("\n");
+
+    print("'a' < 'b' = ");
+    println("a" < "b");
 
     return 0;
 }

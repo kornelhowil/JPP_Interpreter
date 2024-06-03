@@ -1,0 +1,11 @@
+# Runtime error: 2:1 f function does not return a value in all control paths.
+int f(){
+    if(false) {
+        return 1;
+    }
+}
+
+int main() {
+    f();
+    return 0;
+}

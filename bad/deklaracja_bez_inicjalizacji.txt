@@ -1,4 +1,0 @@
-int main() {
-    int a; # Parsing error
-    return 0;
-}

@@ -1,4 +1,0 @@
-int main() {
-    print(f); Variable f is not initialized.
-    return 0;
-}

@@ -1,0 +1,13 @@
+int f() {return 4;}
+
+int g() {return f();}
+
+int f() {return 444;}
+
+int h() {return f();}
+
+int main() {
+    println(g()); # powinno wypisac 4
+    println(h()); # powinno wypisac 444
+    return 0;
+}

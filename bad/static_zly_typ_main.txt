@@ -1,0 +1,4 @@
+# Static error: Main function not found or has wrong type.
+bool main() {
+    return true;
+}

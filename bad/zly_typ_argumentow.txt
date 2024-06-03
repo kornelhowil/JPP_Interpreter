@@ -1,7 +1,0 @@
-int f(int a, int b) {
-    return 0;
-}
-
-int main() {
-    return f(1, "string"); # Function f called with wrong arguments.
-}

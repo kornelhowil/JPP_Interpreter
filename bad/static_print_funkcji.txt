@@ -1,0 +1,9 @@
+Static error: 2:1 Argument a is duplicated.
+int f() { 
+    return 0;
+}
+
+int main() {
+    print(f);
+    return 0;
+}

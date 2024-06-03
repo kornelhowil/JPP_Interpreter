@@ -1,3 +1,4 @@
+# Static error: 3:5 Types do not match. Expected type: bool. Actual type: string
 int main() {
     if ("kaczka") { # Types do not match. Expected type: bool. Actual type: string
         return 0;

@@ -1,0 +1,5 @@
+# Static error: 3:11 Cannot subtract strings.
+int main() {
+    print("bajo" - "jajo");
+    return 0;
+}

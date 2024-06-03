@@ -17,17 +17,33 @@ Możliwe jest także wykonanie programu wczytanego z wejścia standardowego przy
 ./intepreter < prog.txt
 ```
 
-Główne nieoczywiste zasady poprawności programów:
+## Główne nieoczywiste zasady poprawności programów:
 - Program jest listą definicji funkcji
 - Program musi zawierać funkcję main, która nie ma żadnych argumentów i zwraca int
-- Wykonanie programu zaczyna się od wykonania funkcji main
-- Każda funkcja musi posiadać return oraz każde wykonanie funkcji musi kończyć się returnem
+- Wykonanie programu zaczyna się od wykonania ostatniej funkcji main
+- Każde wykonanie funkcji musi kończyć się returnem
 - Aby przekazać argument do funkcji poprzez referencję należy poprzedzić zmienną słowem kluczowym ```var```
 - print() wypisuje na wyjście standardowe bez znaku nowej linii
 - println() wypisuje na wyjście standardowe ze znakiem nowej linii
 - Zmienne nie mogą być niezainicjowane, tzn. ```int a;``` nie przechodzi, ale ```int a = 5;``` już tak
+- Można redefiniować funkcje i zmienne
+
+## Konflikty shift/reduce:
+State 22, State 50: "Ident . (" Nawias może być interpretowany jako część nazwy zmiennej lub początek wywoałania funkcji. Wybierane jest to drugie czyli dobrze.
+
+State 32, State 92: "Expr3 . -"  minus może być intepretowany jako początek wartości ujemnej lub jako odejmowanie. Wybierane jest to drugie czyli dobrze.
 
 Przykłady użycia znajdują się w folderze ```good```.
+
+## Poprawki w drugim terminie
+1. Uniemożliwniono powtórki w nazwach parametrów w definicji funkcji
+2. Print działa tylko dla typów prostych
+3. Porównywanie booli, konktatenacja i porówywanie stringów
+4. Naprawiono statyczne wiązanie
+5. 'Runtime error: _ not declared. ' już nie występuje. Deklaracje są poprawnie sprawdzane na etapie typecheckera.
+6. Praktycznie wszystkie złe przykłady przerobiono i dodano nowe tak, aby każdy możliwy błąd miał przykład.
+7. Dodano przykłady good/09_2 i good/09_3 na statyczne wiązanie
+8. Dodano porównania i konktatencja stringów do good/02
 
 ## Tabelka cech
 Na 15 punktów

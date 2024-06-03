@@ -1,0 +1,9 @@
+# Static error: 3:5 Types do not match. Expected type: int. Actual type: bool
+int f(){
+    return true;
+}
+
+int main() {
+    f();
+    return 0;
+}

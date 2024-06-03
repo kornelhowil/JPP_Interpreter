@@ -1,5 +1,0 @@
-int f() {
-    return 0;
-}
-
-# Main function not found or has wrong type.

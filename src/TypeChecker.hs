@@ -4,6 +4,7 @@ import Control.Monad.Except
 import Control.Monad.State
 import qualified Data.Map as Map
 import System.IO
+import qualified Data.Set as Set
 -- Grammar
 import Grammar.Abs
 import Helper
@@ -16,14 +17,15 @@ instance Show TType where
     show TInt = "int"
     show TStr = "string"
     show TBool = "bool"
+    show (TFun t ts) = "Function(" ++ (show ts) ++ " -> " ++ (show t) ++ ")"
 -- TypeCheckerState --
 type Env = Map.Map String TType
 data TCS = TCS {
     env :: Env,
-    ret1 :: Maybe TType,
-    ret2 :: Maybe TType
+    ret :: Maybe TType,
+    argnames :: Set.Set String
 }
-initState = TCS { env = Map.empty, ret1 = Nothing, ret2 = Nothing }
+initState = TCS { env = Map.empty, ret = Nothing, argnames = Set.empty}
 -- TypeCheckerMonad --
 type TCM a = ExceptT Err (State TCS) a
 ------------------------------
@@ -48,6 +50,30 @@ checkType pos t1 t2 =
         reason="Types do not match. Expected type: " ++ show t1 ++ ". Actual type: " ++ show t2
         }
 
+checkPrint:: Pos -> TType -> TCM ()
+checkPrint pos t = case t of
+    TFun _ _ -> throwError $ Err {
+        pos=pos,
+        reason="Printing functions is not allowed"
+        }
+    _ -> return ()
+
+checkArg:: Pos -> ArgDec -> TCM ()
+checkArg pos (ArgDec _ _ n) = do
+    s <- gets argnames
+    if Set.member (getIdent n) s then throwError $ Err {
+        pos=pos,
+        reason="Argument " ++ (getIdent n) ++ " is duplicated."
+        }
+    else modify (\st -> st {argnames = Set.insert (getIdent n) s})
+    return ()
+
+checkArgs:: Pos -> [ArgDec] -> TCM ()
+checkArgs pos args = do
+    mapM_ (checkArg pos) args
+    modify (\st -> st {argnames = Set.empty})
+    return ()
+
 getArgType :: ArgDec -> TType
 getArgType (ArgDec _ t _) = getType t
 -----------------------------------
@@ -67,18 +93,12 @@ tcProg prog = do
 
 tcFnDef:: FnDef -> TCM ()
 tcFnDef (FnDef pos t n args block) = do
+    checkArgs pos args
     insertType (getIdent n) (TFun (getType t) $ map getArgType args)
     state <- get
     mapM_ (\(ArgDec _ t_a n_a) -> insertType (getIdent n_a) (getType t_a)) args
-    modify (\st -> st {ret1 = Just $ getType t})
+    modify (\st -> st {ret = Just $ getType t})
     tcBlock block
-    ret2 <- gets ret2
-    case ret2 of 
-        Just tr -> checkType pos (getType t) tr
-        Nothing -> throwError $ Err {
-            pos=pos,
-            reason="Function " ++ getIdent n ++ " does not return a value."
-            }
     put state
 
 tcBlock:: Block -> TCM ()
@@ -101,18 +121,17 @@ tcStmt (Ass pos n e) = do
                     }
 tcStmt (Ret pos e) = do
     t <- tcExp e
-    ret1 <- gets ret1
-    case ret1 of
+    ret <- gets ret
+    case ret of
         Just tr -> checkType pos tr t
-    modify (\st -> st {ret2 = Just t})
 tcStmt (Cond pos e b) = do
     tcExp e >>= checkType pos TBool >> tcBlock b
 tcStmt (CondElse pos e b1 b2) = do
     tcExp e >>= checkType pos TBool >> tcBlock b1 >> tcBlock b2
 tcStmt (While pos e b) = do
     tcExp e >>= checkType pos TBool >> tcBlock b
-tcStmt (Print _ e) = tcExp e >> return ()
-tcStmt (Println _ e) = tcExp e >> return ()
+tcStmt (Print pos e) = tcExp e >>= checkPrint pos >> return ()
+tcStmt (Println pos e) = tcExp e >>= checkPrint pos >> return ()
 tcStmt (FuncStmt _ f) = tcFnDef f >> return ()
 tcStmt (App pos e) = case e of
     EApp _ _ _ -> tcExp e >> return ()
