@@ -63,16 +63,16 @@ getVal loc = do
     return val
 
 insertArg :: Namespace -> (ArgDec, Arg) -> IM ()
-insertArg ns (ArgDec _ t n, ArgVal _ e) = do
-    ns' <- gets names
+insertArg ns' (ArgDec _ t n, ArgVal _ e) = do
+    ns <- gets names
     setNamespace ns'
     v <- evalExp e
     setNamespace ns
     loc <- newloc
     insertName loc $ getIdent n
     insertVal loc $ v
-insertArg ns (ArgDec _ _ n1, ArgVar _ n2) = do
-    let (Just loc) = Map.lookup (getIdent n2) ns
+insertArg ns' (ArgDec _ _ n1, ArgVar _ n2) = do
+    let (Just loc) = Map.lookup (getIdent n2) ns'
     insertName loc $ getIdent n1
 
 newloc :: IM Int
@@ -100,6 +100,7 @@ evalFnDef (FnDef pos t n argdecs block) = do
     insertName loc $ getIdent n
     insertFunc loc (\args -> do
         ns' <- gets names
+        setNamespace ns
         mapM_ (insertArg ns') $ zip argdecs args
         res <- evalBlock block
         setNamespace ns'

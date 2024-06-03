@@ -192,7 +192,7 @@ tcArg (ArgVar pos n) = do
         Just x -> return x
         Nothing -> throwError $ Err {
                     pos=pos,
-                    reason="Variable " ++ name ++ " is not initialized."
+                    reason="Variable " ++ name ++ " is not declared."
                     }
 
 runTCS s = runState s initState
