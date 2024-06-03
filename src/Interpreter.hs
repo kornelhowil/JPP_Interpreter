@@ -43,12 +43,8 @@ insertVal loc v = modify (\s -> s { vals = Map.insert loc v (vals s) })
 getLoc :: Pos -> String -> IM Int
 getLoc pos n = do
     ns <- gets names
-    case (Map.lookup n ns) of
-        Just loc -> return loc
-        Nothing -> throwError $ Err {
-            pos=pos,
-            reason= n ++ " not declared."
-        }
+    let (Just loc) = Map.lookup n ns
+    return loc
 
 getFunc :: Int -> IM Func
 getFunc loc = do
@@ -83,6 +79,15 @@ newloc = do
 handleErr :: Err -> IM ()
 handleErr err = do
     liftIO . hPutStrLn stderr $ "Runtime error: " ++ show err
+
+compValue :: (Ord a) => RelOp -> a -> a -> IM Value
+compValue op x y = case op of
+    LTH _ -> return $ VBool $ x < y
+    LE _ -> return $ VBool $ x <= y
+    GTH _ -> return $ VBool $ x > y
+    GE _ -> return $ VBool $ x >= y
+    EQU _ -> return $ VBool $ x == y
+    NE _ -> return $ VBool $ x /= y
 
 evalMain :: IM ()
 evalMain = do
@@ -203,21 +208,28 @@ evalExp (EMul pos e1 op e2) = do
                     }
             _ -> return $ VInt $ x `mod` y
 evalExp (EAdd _ e1 op e2) = do
-    (VInt x) <- evalExp e1
-    (VInt y) <- evalExp e2
-    case op of
-        Plus _ -> return $ VInt $ x + y
-        Minus _ -> return $ VInt $ x - y
+    v1 <- evalExp e1
+    case v1 of
+        VStr s1 -> do
+            (VStr s2) <- evalExp e2
+            return $ VStr $ s1 ++ s2
+        VInt i1 -> do
+            (VInt i2) <- evalExp e2
+            case op of
+                Plus _ -> return $ VInt $ i1 + i2
+                Minus _ -> return $ VInt $ i1 - i2
 evalExp (ERel _ e1 op e2) = do
-    (VInt x) <- evalExp e1
-    (VInt y) <- evalExp e2
-    case op of
-        LTH _ -> return $ VBool $ x < y
-        LE _ -> return $ VBool $ x <= y
-        GTH _ -> return $ VBool $ x > y
-        GE _ -> return $ VBool $ x >= y
-        EQU _ -> return $ VBool $ x == y
-        NE _ -> return $ VBool $ x /= y
+    v1 <- evalExp e1
+    case v1 of
+        VStr x -> do
+            (VStr y) <- evalExp e2
+            compValue op x y
+        VInt x -> do
+            (VInt y) <- evalExp e2
+            compValue op x y
+        VBool x -> do
+            (VBool y) <- evalExp e2
+            compValue op x y
 evalExp (EAnd _ e1 e2) = do
     (VBool x) <- evalExp e1
     (VBool y) <- evalExp e2

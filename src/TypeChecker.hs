@@ -97,7 +97,7 @@ tcStmt (Ass pos n e) = do
         Just t -> (tcExp e) >>= checkType pos t
         Nothing -> throwError $ Err {
                     pos=pos,
-                    reason="Variable " ++ name ++ " is not initialized."
+                    reason="Variable " ++ name ++ " is not declared."
                     }
 tcStmt (Ret pos e) = do
     t <- tcExp e
@@ -129,10 +129,8 @@ tcExp (EVar pos n) = do
         Just x -> return x
         Nothing -> throwError $ Err {
                     pos=pos,
-                    reason="Variable " ++ name ++ " is not initialized."
+                    reason="Variable " ++ name ++ " is not declared."
                     }
--- tcExp (EArr _ _) TODO
--- tcExp (EArVal _ _) TODO
 tcExp (EInt _ _) = return TInt
 tcExp (ETrue _) = return TBool
 tcExp (EFalse _) = return TBool
@@ -166,14 +164,34 @@ tcExp (EMul pos e1 _ e2) = do
     tcExp e1 >>= checkType pos TInt
     tcExp e2 >>= checkType pos TInt
     return TInt
-tcExp (EAdd pos e1 _ e2) = do
-    tcExp e1 >>= checkType pos TInt
-    tcExp e2 >>= checkType pos TInt
-    return TInt
+tcExp (EAdd pos e1 op e2) = do
+    t1 <- tcExp e1
+    t2 <- tcExp e2
+    checkType pos t1 t2
+    case t1 of
+        TInt -> return TInt
+        TStr -> case op of
+            Plus _ -> return TStr
+            Minus _ -> throwError $ Err {
+                pos=pos,
+                reason="Cannot subtract strings."
+                }
+        _ -> throwError $ Err {
+            pos=pos,
+            reason="Cannot add " ++ show t1 ++ " and " ++ show t2
+            }
 tcExp (ERel pos e1 _ e2) = do
-    tcExp e1 >>= checkType pos TInt
-    tcExp e2 >>= checkType pos TInt
-    return TBool
+    t1 <- tcExp e1
+    t2 <- tcExp e2
+    checkType pos t1 t2
+    case t1 of
+        TInt -> return TBool
+        TStr -> return TBool
+        TBool -> return TBool
+        _ -> throwError $ Err {
+            pos=pos,
+            reason="Cannot compare " ++ show t1 ++ " and " ++ show t2
+            }
 tcExp (EAnd pos e1 e2) = do
     tcExp e1 >>= checkType pos TBool
     tcExp e2 >>= checkType pos TBool
